@@ -1,0 +1,46 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. 后端 FastAPI 服务
+  server:
+    build: ./server  # 指定使用 server 目录下的 Dockerfile 进行构建
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./server/app:/app/app  # 将本地 app 目录挂载到容器中，实现代码热重载
+      - ./vector_store:/app/vector_store # 将本地 vector_store 目录挂载，用于持久化向量索引
+      - model_cache:/app/model_cache # 持久化 HuggingFace 模型缓存 (匹配代码中的路径)
+    ports:
+      - "8000:8000"  # 将容器的 8000 端口映射到主机的 8000 端口
+    environment:
+      # 使用 .env 文件来管理敏感信息和配置
+      - DATABASE_URL=postgresql://user:password@db:5432/mydatabase
+      - REDIS_URL=redis://cache:6379
+      - SECRET_KEY=${SECRET_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      - db      # 确保 db 服务先于 server 启动
+      - cache   # 确保 cache 服务先于 server 启动
+
+  # 2. PostgreSQL 数据库服务
+  db:
+    image: postgres:13-alpine  # 使用轻量级的 alpine postgres 镜像
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/  # 将数据库数据持久化到名为 postgres_data 的卷中
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydatabase
+    ports:
+      - "5433:5432"  # 将容器的 5432 端口映射到主机的 5433 端口，避免与本地已安装的PostgreSQL冲突
+
+  # 3. Redis 缓存服务
+  cache:
+    image: redis:6-alpine  # 使用轻量级的 alpine redis 镜像
+    ports:
+      - "6379:6379"  # 将容器的 6379 端口映射到主机的 6379 端口
+
+# Docker 卷定义
+volumes:
+  postgres_data:  # 定义一个名为 postgres_data 的持久化卷
+  model_cache:  # 定义一个名为 model_cache 的持久化卷，避免重复下载模型
