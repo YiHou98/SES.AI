@@ -24,23 +24,29 @@ class ContextManager:
             return conversation_history
 
         # 1. Get the embedding for the current query using cached embedding if available
+        # Format current query to match historical format for consistent semantic space
+        current_query_formatted = f"Question: {current_query}"
+        
         if rag_service and conversation_id is not None:
-            # Use conversation-level cached embedding
-            current_embedding = rag_service.get_conversation_embedding(current_query, conversation_id)
+            # Use conversation-level cached embedding with formatted query
+            current_embedding = rag_service.get_conversation_embedding(current_query_formatted, conversation_id)
         else:
             # Fallback to direct embedding computation
-            current_embedding = self.embeddings.embed_query(current_query)
+            current_embedding = self.embeddings.embed_query(current_query_formatted)
 
         relevant_context = []
         
         # We only consider the last N turns for efficiency.
         for query, response in conversation_history[-self.max_history:]:
-            # 2. Get the embedding for the historical query using cache
+            # 2. Get the embedding for the historical query+response combination using cache
+            # Combine question and answer for better semantic understanding
+            combined_historical_text = f"Question: {query}\nAnswer: {response}"
+            
             if rag_service and conversation_id is not None:
-                # Use conversation-level cached embedding for historical queries too
-                hist_embedding = rag_service.get_conversation_embedding(query, conversation_id)
+                # Use conversation-level cached embedding for historical Q+A combinations
+                hist_embedding = rag_service.get_conversation_embedding(combined_historical_text, conversation_id)
             else:
-                hist_embedding = self.embeddings.embed_query(query)
+                hist_embedding = self.embeddings.embed_query(combined_historical_text)
             
             # 3. Calculate cosine similarity.
             # np.array(...).reshape(1, -1) is needed to make the vectors 2D for the function.

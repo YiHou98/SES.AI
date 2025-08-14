@@ -28,7 +28,6 @@ async def startup_event():
             print("📥 正在下载/加载 BAAI/bge-base-en-v1.5 模型...")
             from app.services.rag_service import RAGService
             rag_service = RAGService()
-            # 触发embedding模型加载
             _ = rag_service.embeddings
             print("✅ Embedding模型预热完成！")
             return True
@@ -51,8 +50,7 @@ async def startup_event():
     
     print("🎉 FastAPI应用启动完成！")
 
-# --- THIS IS THE FIX ---
-# Replace the comment with the actual middleware code block.
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://localhost:3000"],

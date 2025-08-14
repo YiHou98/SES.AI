@@ -25,7 +25,7 @@ def update_model_preference(
             detail="Only premium users can select a model."
         )
     
-    allowed_models = ["claude-3-5-sonnet-20240620", "claude-3-opus-20240229"]
+    allowed_models = ["claude-3-5-sonnet-20240620", "claude-opus-4-1-20250805"]
     if model not in allowed_models:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

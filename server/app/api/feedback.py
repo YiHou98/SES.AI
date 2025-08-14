@@ -64,7 +64,7 @@ def submit_feedback(
     )
     db.add(user_feedback)
     
-    # Process document quality scoring (existing logic)
+    # Process document quality scoring
     try:
         score_updates = feedback_service.get_feedback_distribution(
             feedback=feedback.vote,
@@ -77,7 +77,6 @@ def submit_feedback(
             crud_document.update_chunk_feedback_scores(db, score_updates=score_updates)
             
     except Exception as e:
-        # Don't fail the entire request if document scoring fails
         logger.warning(f"Document scoring failed: {e}")
     
     db.commit()

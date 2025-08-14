@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     # LLM模型成本配置（每1M tokens的USD价格）
     MODEL_COSTS: dict = {
         "claude-3-5-sonnet-20240620": {"input": 3.00, "output": 15.00},
-        "claude-3-opus-20240229": {"input": 15.00, "output": 75.00}
+        "claude-opus-4-1-20250805": {"input": 15.00, "output": 75.00}
     }
 
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY")

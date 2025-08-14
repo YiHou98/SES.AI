@@ -9,7 +9,7 @@ class SimilarityWeightedAttribution:
         feedback: int, # +1 or -1
         source_chunks: List[Dict[str, Any]], # From the RAG response
         query: str,
-        rag_service: RAGService # Pass in the RAG service to use its embedding model
+        rag_service: RAGService
     ) -> List[Dict[str, Any]]:
         if not source_chunks:
             return []
@@ -27,7 +27,7 @@ class SimilarityWeightedAttribution:
         
         # Normalize scores to get weights
         total_similarity = np.sum(similarity_scores)
-        if total_similarity == 0: # Avoid division by zero
+        if total_similarity == 0:
             weights = [1 / len(source_chunks)] * len(source_chunks)
         else:
             weights = [score / total_similarity for score in similarity_scores]

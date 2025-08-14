@@ -29,6 +29,7 @@ except redis.exceptions.ConnectionError as e:
     redis_client = None
 
 def get_db() -> Generator:
+    """数据库会话依赖"""
     try:
         db = SessionLocal()
         yield db
@@ -39,6 +40,7 @@ def get_current_user(
     db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme)
 ) -> User:
+    """当前用户依赖"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -65,6 +67,7 @@ def get_current_active_user(
     return current_user
 
 def rate_limit_dependency(user: User = Depends(get_current_active_user)) -> Generator[User, None, None]:
+    """速率限制依赖"""
     if user.tier.value != "free" or not redis_client:
         yield user
         return
@@ -106,5 +109,6 @@ def rate_limit_dependency(user: User = Depends(get_current_active_user)) -> Gene
 
 @lru_cache()
 def get_rag_service() -> RAGService:
+    """RAG服务单例依赖"""
     os.makedirs(settings.VECTOR_STORE_PATH, exist_ok=True)
     return RAGService()

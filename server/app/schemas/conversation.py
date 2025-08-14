@@ -22,15 +22,6 @@ class ConversationBase(BaseModel):
 class ConversationCreate(ConversationBase):
     pass
     
-# This schema will be used when fetching a user
-# and wanting to see their list of conversations.
-class Conversation(ConversationBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
 class ConversationInDB(ConversationBase):
     id: int
     workspace_id: int 

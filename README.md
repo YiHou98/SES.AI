@@ -42,6 +42,83 @@ graph TD
   B5-->|速率/订阅|C3
   B6-->|日志/反馈|C1
 ```
+## Entity Relationship Diagram
+
+```
+┌─────────────┐       ┌─────────────────┐       ┌─────────────────┐
+│    users    │──────▶│   workspaces    │──────▶│   documents     │
+│             │       │                 │       │                 │
+│ id (PK)     │       │ id (PK)         │       │ id (PK)         │
+│ username    │       │ name            │       │ filename        │
+│ email       │       │ domain          │       │ workspace_id(FK)│
+│ password    │       │ owner_id (FK)   │       │ created_at      │
+│ is_active   │       │                 │       │                 │
+│ tier        │       └─────────────────┘       └─────────────────┘
+│ selected_..│                │                          │
+└─────────────┘                │                          ▼
+       │                       │                ┌─────────────────┐
+       │                       │                │ document_chunks │
+       │                       │                │                 │
+       │                       │                │ id (PK)         │
+       │                       │                │ chunk_id        │
+       │                       │                │ document_id(FK) │
+       │                       │                │ content         │
+       │                       │                │ feedback_score  │
+       │                       │                └─────────────────┘
+       │                       │
+       │                       ▼
+       │             ┌─────────────────┐
+       │             │ conversations   │
+       │             │                 │
+       │             │ id (PK)         │
+       │             │ owner_id (FK)   │
+       │             │ title           │
+       │             │ workspace_id(FK)│
+       │             │ created_at      │
+       │             └─────────────────┘
+       │                       │
+       │                       ▼
+       │             ┌─────────────────┐
+       │             │    messages     │
+       │             │                 │
+       │             │ id (PK)         │
+       │             │ conversation..(FK)│
+       │             │ query           │
+       │             │ response        │
+       │             │ created_at      │
+       │             │ model_used      │
+       │             │ tokens...       │
+       │             │ estimated_cost  │
+       │             │ response_time_ms│
+       │             └─────────────────┘
+       │
+       ├─────────────┐
+       │             ▼
+       │    ┌─────────────────┐
+       │    │ user_feedback   │
+       │    │                 │
+       │    │ id (PK)         │
+       │    │ user_id (FK)    │
+       │    │ message_hash    │
+       │    │ conversation..(FK)│
+       │    │ vote            │
+       │    │ query           │
+       │    │ created_at      │
+       │    └─────────────────┘
+       │
+       ├─────────────┐
+       │             ▼
+       │    ┌─────────────────┐
+       │    │     jobs        │
+       │    │                 │
+       │    │ id (PK)         │
+       │    │ user_id (FK)    │
+       │    │ status          │
+       │    │ details         │
+       │    └─────────────────┘
+       │
+```
+
 ## 核心功能实现
 
 1. **用户账户 & 鉴权系统**
@@ -76,3 +153,7 @@ graph TD
 - **模型调用日志与运营分析**：所有对话与调用均记录，支持运营分析（见 `analytics.py`）。
 - **用户反馈与文档质量排序**：支持对回答点赞/踩，反馈用于文档质量排序（见 `feedback.py`）。
 - **模拟订阅升级 UI**：前端支持订阅等级切换
+
+### 下一步计划
+- **查询路由器（Query Router）**：这个路由器会在执行 RAG 检索前，先对用户的输入进行意图分析。如果判断为知识性提问，则启动完整的 RAG 流程；如果判断为普通闲聊，则会绕过向量检索，直接由语言模型进行回复。
+- **更安全的认证方式**：在生产环境中应该使用Refresh Token → HttpOnly Cookie（长期，安全），Access Token → Memory/sessionStorage（短期，相对安全）。

@@ -14,9 +14,9 @@ const ModelSelector = ({ selectedModel, onModelChange, disabled, user }) => {
             description: 'Most intelligent model'
         },
         { 
-            value: 'claude-3-opus-20240229', 
-            label: 'Claude 3 Opus',
-            description: 'Powerful model for complex tasks'
+            value: 'claude-opus-4-1-20250805', 
+            label: 'Claude Opus 4.1',
+            description: 'Most powerful model for complex tasks'
         },
     ];
 

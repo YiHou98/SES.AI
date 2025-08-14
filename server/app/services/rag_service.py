@@ -31,15 +31,22 @@ Standalone question:"""
 CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(_template)
 
 # QA prompt template that always includes chat history in final generation
-QA_TEMPLATE = """Use the following context and chat history to answer the question.
+QA_TEMPLATE = """You are a helpful AI assistant. Use the provided context and chat history to answer the question.
 
-Context:
+Context from documents:
 {context}
 
 Chat History:
 {chat_history}
 
 Question: {question}
+
+Instructions:
+1. First, check if the provided context contains information relevant to the question
+2. If the context contains relevant information, use it to answer the question
+3. If the context does NOT contain relevant information or is insufficient, use your general knowledge to provide a helpful answer
+4. Always be clear about whether your answer comes from the provided documents or your general knowledge
+
 Answer:"""
 
 QA_PROMPT = PromptTemplate.from_template(QA_TEMPLATE)
