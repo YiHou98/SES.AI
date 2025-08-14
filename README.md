@@ -13,20 +13,20 @@ graph TD
     A2[对话页面]
     A3[文档上传]
     A4[订阅管理]
+    A5[日志分析]
   end
   subgraph 后端 server
     B1[用户与权限管理<br/>JWT认证]
     B2[会话与对话管理]
     B3[RAG 问答引擎<br/>FAISS向量检索]
     B4[文档处理与索引]
-    B5[订阅/速率限制<br/>Stripe模拟]
+    B5[订阅/速率限制]
     B6[反馈与日志分析]
   end
   subgraph 数据存储
-    C1[(PostgreSQL)]
-    C2[(FAISS)]
-    C3[(Redis)]
-    C4[(本地文件/对象存储)]
+    C1[(PostgreSQL<br/>用户数据+文档内容)]
+    C2[(FAISS向量文件<br/>./vector_store/)]
+    C3[(Redis<br/>速率限制)]
   end
 
   A1-->|API|B1
@@ -34,11 +34,12 @@ graph TD
   A2-->|API|B3
   A3-->|API|B4
   A4-->|API|B5
+  A5-->|API|B6
   B1-->|用户数据|C1
   B2-->|会话/消息|C1
   B3-->|检索|C2
-  B4-->|文档元数据|C1
-  B4-->|文档内容|C4
+  B4-->|文档元数据+内容|C1
+  B4-->|向量索引|C2
   B5-->|速率/订阅|C3
   B6-->|日志/反馈|C1
 ```
