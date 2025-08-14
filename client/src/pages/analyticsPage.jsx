@@ -108,10 +108,6 @@ function AnalyticsPage() {
                                     <div className="stat-label">Total Cost</div>
                                 </div>
                                 <div className="stat-item">
-                                    <div className="stat-value">{usageStats.success_rate}</div>
-                                    <div className="stat-label">Success Rate</div>
-                                </div>
-                                <div className="stat-item">
                                     <div className="stat-value">{usageStats.avg_cost_per_query}</div>
                                     <div className="stat-label">Avg Cost/Query</div>
                                 </div>
@@ -173,21 +169,41 @@ function AnalyticsPage() {
                         <div className="daily-trend">
                             <h2>📅 Daily Cost Trend ({selectedPeriod} days)</h2>
                             <div className="trend-chart">
-                                {Object.entries(usageStats.daily_cost_trend || {})
-                                    .sort(([a], [b]) => new Date(a) - new Date(b))
-                                    .map(([date, cost]) => (
-                                    <div key={date} className="trend-bar">
-                                        <div 
-                                            className="bar" 
-                                            style={{
-                                                height: `${Math.max(cost * 1000, 5)}px`, // Scale for visibility
-                                                minHeight: '5px'
-                                            }}
-                                        ></div>
-                                        <div className="bar-label">{new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                                        <div className="bar-value">${cost.toFixed(4)}</div>
-                                    </div>
-                                ))}
+                                {(() => {
+                                    const dailyCosts = Object.entries(usageStats.daily_cost_trend || {})
+                                        .sort(([a], [b]) => new Date(a) - new Date(b));
+                                    
+                                    if (dailyCosts.length === 0) {
+                                        return <div className="no-trend-data">No data available for this period</div>;
+                                    }
+                                    
+                                    // Find max cost for proper scaling
+                                    const maxCost = Math.max(...dailyCosts.map(([, cost]) => cost));
+                                    const maxHeight = 150; // Maximum bar height in pixels
+                                    
+                                    return dailyCosts.map(([date, cost]) => {
+                                        // Scale height proportionally to max cost, with minimum 5px
+                                        const height = maxCost > 0 
+                                            ? Math.max((cost / maxCost) * maxHeight, 5)
+                                            : 5;
+                                        
+                                        return (
+                                            <div key={date} className="trend-bar" title={`${date}: $${cost.toFixed(4)}`}>
+                                                <div 
+                                                    className="bar" 
+                                                    style={{ height: `${height}px` }}
+                                                ></div>
+                                                <div className="bar-label">
+                                                    {new Date(date).toLocaleDateString('en-US', { 
+                                                        month: 'short', 
+                                                        day: 'numeric' 
+                                                    })}
+                                                </div>
+                                                <div className="bar-value">${cost.toFixed(4)}</div>
+                                            </div>
+                                        );
+                                    });
+                                })()}
                             </div>
                         </div>
 
